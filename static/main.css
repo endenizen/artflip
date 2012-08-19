@@ -1,0 +1,84 @@
+body {
+  background: black;
+  color: white;
+  margin: 0;
+  overflow: hidden;
+  font-family: Helvetica Neue;
+}
+
+a {
+  color: white;
+  text-decoration: none;
+}
+
+#login {
+  position: absolute;
+  width: 100%;
+  text-align: center;
+  top: 50%;
+  font-size: 30px;
+  margin-top: -10px;
+}
+
+#logout {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 10px;
+  padding: 5px;
+}
+
+#content .container {
+  position: relative;
+}
+
+#content .container .album {
+  position: absolute;
+  z-index: 10;
+}
+
+#content .container .album {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+@-webkit-keyframes flipped {
+  0% { -webkit-transform: perspective(5000px) rotateY(180deg); }
+  50% { -webkit-transform: perspective(5000px) rotateY(90deg); }
+  100% { -webkit-transform: perspective(5000px) rotateY(0deg); }
+}
+
+@-webkit-keyframes flipping {
+  0% { -webkit-transform: perspective(5000px) rotateY(0deg); }
+  50% { -webkit-transform: perspective(5000px) rotateY(-90deg); }
+  100% {
+    -webkit-transform: perspective(5000px) rotateY(-180deg);
+    -webkit-animation-timing-function: ease-out;
+  }
+}
+
+#content .container .album.flippedl,
+#content .container .album.flippedr,
+#content .container .album.flippingl,
+#content .container .album.flippingr {
+  -webkit-animation: flipped 0.60s normal linear;
+  -webkit-backface-visibility: hidden;
+  z-index: 20;
+}
+
+#content .container .album.flippedl {
+}
+
+#content .container .album.flippingl {
+  -webkit-animation-name: flipping;
+}
+
+#content .container .album.flippedr {
+  -webkit-animation-name: flipping;
+  -webkit-animation-direction: reverse;
+}
+
+#content .container .album.flippingr {
+  -webkit-animation-direction: reverse;
+}
