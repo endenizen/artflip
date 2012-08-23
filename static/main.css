@@ -70,12 +70,9 @@ a {
 }
 
 #content .container .album {
+  -webkit-transform: rotateY(0);
   position: absolute;
   z-index: 10;
-}
-
-#content .container .album {
-  position: absolute;
   top: 0;
   left: 0;
 }
