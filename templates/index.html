@@ -5,27 +5,15 @@
     <script src="{{ url_for('static', filename='jquery-1.7.1.min.js') }}"></script>
     <script src="{{ url_for('static', filename='underscore-min.js') }}"></script>
     <script src="{{ url_for('static', filename='main.js') }}"></script>
-    {% if logged_in_key %}
-    <script>
-      var logged_in_key = "{{ logged_in_key }}";
-    </script>
-    {% endif %}
   </head>
 
   <body>
-    {% if logged_in_key %}
-      <a id="logout" href="{{ url_for('logout') }}">Logout</a>
-      <div id="content">
-        <div id="control_toggle">+</div>
-        <div id="controls">
-          Rows <input type="text" class="rows" /> <input type="button" class="rows_submit" value="Submit" />
-        </div>
-        <div class="container"></div>
+    <div id="content">
+      <div id="control_toggle">+</div>
+      <div id="controls">
+        Rows <input type="text" class="rows" /> <input type="button" class="rows_submit" value="Submit" />
       </div>
-    {% else %}
-      <div id="login_holder">
-        <a id="login" href="{{ url_for('login') }}">Login with Rdio</a>
-      </div>
-    {% endif %}
+      <div class="container"></div>
+    </div>
   </body>
 </html>

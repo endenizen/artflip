@@ -50,11 +50,18 @@ def get_albums():
 
   offset = params['offset']
 
-  result = api.call('getHeavyRotation', {
-    'user': params['key'],
+  #result = api.call('getHeavyRotation', {
+  #  'user': params['key'],
+  #  'extras': '-*,key,icon',
+  #  'start': offset,
+  #  'count': 50,
+  #})
+
+  result = api.call('getTopCharts', {
+    'type': 'Album',
     'extras': '-*,key,icon',
     'start': offset,
-    'count': 50,
+    'count': 50
   })
 
   albums = result['result']

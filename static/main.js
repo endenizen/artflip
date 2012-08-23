@@ -1,11 +1,10 @@
 (function() {
 
-var App = function(user) {
+var App = function() {
   // Never load more than this many albums
-  this.ALBUM_LIMIT = 10;
+  this.ALBUM_LIMIT = 300;
 
-  this.rows = 3;
-  this.user = user;
+  this.rows = 5;
   this.albums = [];
   // Album lookup of key -> this.albums index
   this.albumLookup = {};
@@ -69,7 +68,6 @@ App.prototype.getAlbums = function(k) {
     $.ajax({
       url: '/get_albums',
       data: {
-        key: that.user,
         offset: that.albums.length
       },
       success: function(result) {
@@ -179,7 +177,7 @@ App.prototype.flipTime = function() {
 
   // 1.5 to 6.5 second delay till next flip.
   var time = Math.random() * 5000 + 1500;
-  time = 1200;
+  //time = 1200;
   this.flipTimeout = setTimeout(_.bind(this.flipTime, this), time);
 };
 
@@ -203,9 +201,7 @@ App.prototype.resize = function() {
 };
 
 $(document).ready(function() {
-  if (window.logged_in_key) {
-    window.app = new App(window.logged_in_key);
-  }
+  window.app = new App();
 });
 
 })();
