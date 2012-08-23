@@ -4,6 +4,7 @@ var App = function(user) {
   // Never load more than this many albums
   this.ALBUM_LIMIT = 10;
 
+  this.rows = 3;
   this.user = user;
   this.albums = [];
   // Album lookup of key -> this.albums index
@@ -18,7 +19,34 @@ App.prototype.init = function() {
 
   this.content = $('#content .container');
 
+  $('#control_toggle').on('click', _.bind(this.showControls, this));
+  $('#content').on('click', _.bind(this.hideControls, this));
+
+  $('#controls .rows_submit').on('click', _.bind(this.changeRows, this));
+
   this.getAlbums(_.bind(this.startFlip, this));
+};
+
+App.prototype.changeRows = function() {
+  this.rows = parseInt($('#controls .rows').val());
+  this.startFlip();
+  return false;
+};
+
+App.prototype.showControls = function() {
+  $('#controls .rows').val(this.rows);
+  $('#controls').show();
+  $('#control_toggle').hide();
+  return false;
+};
+
+App.prototype.hideControls = function(e) {
+  if ($(e.target).closest('#controls').length > 0) {
+    return;
+  }
+  $('#controls').hide();
+  $('#control_toggle').show();
+  return false;
 };
 
 // Add album to albums array if it doesn't exist already
@@ -73,8 +101,6 @@ App.prototype.startFlip = function() {
     clearTimeout(this.flipTimeout);
     this.flipTimeout = null;
   }
-
-  this.rows = 3;
 
   // Clear out existing images
   this.content.find('img').remove();
