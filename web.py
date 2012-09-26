@@ -50,7 +50,7 @@ def get_albums():
 
   offset = params['offset']
   source_type = params['type']
-  user = params['user']
+  user = params.get('user')
   user_key = None
   count = 50
 
@@ -62,14 +62,7 @@ def get_albums():
     # TODO handle user not found
     user_key = user_result['result']['key']
 
-  if source_type == 'top':
-    result = api.call('getTopCharts', {
-      'type': 'Album',
-      'extras': '-*,key,icon',
-      'start': offset,
-      'count': count
-    })
-  elif source_type == 'collection':
+  if source_type == 'collection' and user:
     result = api.call('getAlbumsInCollection', {
       'user': user_key,
       'start': offset,
@@ -78,20 +71,27 @@ def get_albums():
     })
     # add key items (since we look for 'key' not 'albumKey' in js
     [a.update({'key': a['albumKey']}) for a in result['result']]
-  elif source_type == 'heavyrotation':
+  elif source_type == 'heavyrotation' and user:
     result = api.call('getHeavyRotation', {
       'user': user_key,
       'start': offset,
       'count': count,
       'type': 'albums'
     })
-  elif source_type == 'friendsheavyrotation':
+  elif source_type == 'friendsheavyrotation' and user:
     result = api.call('getHeavyRotation', {
       'user': user_key,
       'start': offset,
       'count': count,
       'type': 'albums',
       'friends' :'true'
+    })
+  else: # top albums
+    result = api.call('getTopCharts', {
+      'type': 'Album',
+      'extras': '-*,key,icon',
+      'start': offset,
+      'count': count
     })
 
   albums = result['result']
