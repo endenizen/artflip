@@ -1,10 +1,18 @@
 (function() {
 
-var App = function() {
-  // Never load more than this many albums
-  this.ALBUM_LIMIT = 300;
+var App = function(options) {
+  this.options = options;
 
-  this.rows = 5;
+  _.defaults(this.options, {
+    rows: 3,
+    delay: 3,
+    type: 'top',
+    username: null
+  });
+
+  // Never load more than this many albums
+  this.ALBUM_LIMIT = 500;
+
   this.albums = [];
   // Album lookup of key -> this.albums index
   this.albumLookup = {};
@@ -27,13 +35,13 @@ App.prototype.init = function() {
 };
 
 App.prototype.changeRows = function() {
-  this.rows = parseInt($('#controls .rows').val());
+  this.options.rows = parseInt($('#controls .rows').val());
   this.startFlip();
   return false;
 };
 
 App.prototype.showControls = function() {
-  $('#controls .rows').val(this.rows);
+  $('#controls .rows').val(this.options.rows);
   $('#controls').show();
   $('#control_toggle').hide();
   return false;
@@ -68,6 +76,8 @@ App.prototype.getAlbums = function(k) {
     $.ajax({
       url: '/get_albums',
       data: {
+        type: that.options.type,
+        user: that.options.user,
         offset: that.albums.length
       },
       success: function(result) {
@@ -104,7 +114,7 @@ App.prototype.startFlip = function() {
   this.content.find('img').remove();
 
   // Width/height of each image
-  this.size = Math.ceil(window.innerHeight / this.rows);
+  this.size = Math.ceil(window.innerHeight / this.options.rows);
 
   var colCount = window.innerWidth / this.size;
 
@@ -121,7 +131,7 @@ App.prototype.startFlip = function() {
 
   this.grid = [];
 
-  for (var i = 0; i < this.rows; i++) {
+  for (var i = 0; i < this.options.rows; i++) {
     this.grid[i] = [];
     for (var j = 0; j < this.cols; j++) {
       // Assign random album index to this grid location
@@ -154,7 +164,7 @@ App.prototype.flipTime = function() {
   var that = this;
 
   var col = this.randInt(this.cols);
-  var row = this.randInt(this.rows);
+  var row = this.randInt(this.options.rows);
   var dir = this.randInt(2) === 1 ? 'l' : 'r';
   var newAlbumIndex = this.randInt(this.albums.length);
 
@@ -170,15 +180,12 @@ App.prototype.flipTime = function() {
   // Set reference to newly created image
   this.grid[row][col].image = newImage;
 
-  setTimeout(function() {
+  this.cleanupTimeout = setTimeout(function() {
     newImage.removeClass('flipped' + dir);
     curImage.remove();
   }, 1000);
 
-  // 1.5 to 6.5 second delay till next flip.
-  var time = Math.random() * 5000 + 1500;
-  //time = 1200;
-  this.flipTimeout = setTimeout(_.bind(this.flipTime, this), time);
+  this.flipTimeout = setTimeout(_.bind(this.flipTime, this), this.options.delay * 1000);
 };
 
 App.prototype.randInt = function(c) {
@@ -200,8 +207,43 @@ App.prototype.resize = function() {
   }
 };
 
+App.prototype.destroy = function() {
+  // coming soon...
+  if (this.flipTimeout) {
+    clearTimeout(this.flipTimeout);
+    this.flipTimeout = null;
+  }
+  if (this.cleanupTimeout) {
+    clearTimeout(this.cleanupTimeout);
+    this.cleanupTimeout = null;
+  }
+  this.content.empty();
+};
+
+window.app = null;
+
+function setupApp() {
+  if (window.app) {
+    window.app.destroy();
+    window.app = null;
+  }
+  var options = {};
+  var parts;
+  try {
+    parts = window.location.hash.substring(1).split(';');
+    _.each(parts, function(part) {
+      var option = part.split('=');
+      options[option[0]] = option[1];
+    });
+  } catch (e) {
+    options = {};
+  }
+  window.app = new App(options);
+}
+
 $(document).ready(function() {
-  window.app = new App();
+  setupApp();
+  $(window).on('hashchange', setupApp);
 });
 
 })();

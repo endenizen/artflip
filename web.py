@@ -49,20 +49,50 @@ def get_albums():
   params = dict([part.split('=') for part in request.query_string.split('&')])
 
   offset = params['offset']
+  source_type = params['type']
+  user = params['user']
+  user_key = None
+  count = 50
 
-  #result = api.call('getHeavyRotation', {
-  #  'user': params['key'],
-  #  'extras': '-*,key,icon',
-  #  'start': offset,
-  #  'count': 50,
-  #})
+  if user and source_type != 'top':
+    user_result = api.call('findUser', {
+      'vanityName': user,
+      'extras': '-*,key'
+    })
+    # TODO handle user not found
+    user_key = user_result['result']['key']
 
-  result = api.call('getTopCharts', {
-    'type': 'Album',
-    'extras': '-*,key,icon',
-    'start': offset,
-    'count': 50
-  })
+  if source_type == 'top':
+    result = api.call('getTopCharts', {
+      'type': 'Album',
+      'extras': '-*,key,icon',
+      'start': offset,
+      'count': count
+    })
+  elif source_type == 'collection':
+    result = api.call('getAlbumsInCollection', {
+      'user': user_key,
+      'start': offset,
+      'extras': '-*,albumKey,icon',
+      'count': count
+    })
+    # add key items (since we look for 'key' not 'albumKey' in js
+    [a.update({'key': a['albumKey']}) for a in result['result']]
+  elif source_type == 'heavyrotation':
+    result = api.call('getHeavyRotation', {
+      'user': user_key,
+      'start': offset,
+      'count': count,
+      'type': 'albums'
+    })
+  elif source_type == 'friendsheavyrotation':
+    result = api.call('getHeavyRotation', {
+      'user': user_key,
+      'start': offset,
+      'count': count,
+      'type': 'albums',
+      'friends' :'true'
+    })
 
   albums = result['result']
   return jsonify(albums=albums)
