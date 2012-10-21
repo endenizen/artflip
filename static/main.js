@@ -20,40 +20,15 @@ var App = function(options) {
 };
 
 App.prototype.init = function() {
+  _.bindAll(this);
+
   // Setup initial size and bind resize
-  $(window).on('resize', _.bind(this.resize, this));
+  $(window).on('resize', this.resize);
   this.resize();
 
-  this.content = $('#content .container');
+  this.content = $('#content').find('.container');
 
-  $('#control_toggle').on('click', _.bind(this.showControls, this));
-  $('#content').on('click', _.bind(this.hideControls, this));
-
-  $('#controls .rows_submit').on('click', _.bind(this.changeRows, this));
-
-  this.getAlbums(_.bind(this.startFlip, this));
-};
-
-App.prototype.changeRows = function() {
-  this.options.rows = parseInt($('#controls .rows').val());
-  this.startFlip();
-  return false;
-};
-
-App.prototype.showControls = function() {
-  $('#controls .rows').val(this.options.rows);
-  $('#controls').show();
-  $('#control_toggle').hide();
-  return false;
-};
-
-App.prototype.hideControls = function(e) {
-  if ($(e.target).closest('#controls').length > 0) {
-    return;
-  }
-  $('#controls').hide();
-  $('#control_toggle').show();
-  return false;
+  this.getAlbums(this.startFlip);
 };
 
 // Add album to albums array if it doesn't exist already
