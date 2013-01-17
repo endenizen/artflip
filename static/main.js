@@ -91,11 +91,16 @@ App.prototype.startFlip = function() {
   // Width/height of each image
   this.size = Math.ceil(window.innerHeight / this.options.rows);
 
+  // Exact number of columns we could show
   var colCount = window.innerWidth / this.size;
 
-  // We'll need to make a full column out of the remainder
-  // as well as add an extra that appears on the other side
-  this.cols = 1 + Math.ceil(colCount);
+  // How many columns
+  this.cols = Math.round(colCount);
+
+  // If we rounded down, add an extra album on either side
+  if (this.cols < colCount) {
+    this.cols += 2;
+  }
 
   // Adjust canvas
   var leftover = this.size * (colCount - this.cols + 2);
