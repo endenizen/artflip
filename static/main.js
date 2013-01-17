@@ -80,13 +80,13 @@ App.prototype.getAlbums = function(k) {
 App.prototype.startFlip = function() {
   this.started = true;
 
-  if (this.flipTimeout) {
-    clearTimeout(this.flipTimeout);
-    this.flipTimeout = null;
+  if (this.finishLoadingTimeout) {
+    clearTimeout(this.finishLoadingTimeout);
+    this.finishLoadingTimeout = null;
   }
 
   // Clear out existing images
-  this.content.find('img').remove();
+  this.content.find('.album img').unbind('load').remove();
 
   // Width/height of each image
   this.size = Math.ceil(window.innerHeight / this.options.rows);
@@ -111,11 +111,14 @@ App.prototype.startFlip = function() {
 
   this.grid = [];
 
+  var contentFrag = document.createDocumentFragment();
+
   for (var i = 0; i < this.options.rows; i++) {
     this.grid[i] = [];
     for (var j = 0; j < this.cols; j++) {
       // Assign random album index to this grid location
       var index = this.randInt(this.albums.length);
+
       this.grid[i][j] = {
         albumIndex: index,
         image: $('<div class="album"></div>').css({
@@ -123,11 +126,52 @@ App.prototype.startFlip = function() {
           left: j * this.size
         }).append('<img src="' + this.getAlbumArt(index) + '" width="' + this.size + '" height="' + this.size + '" />')
       };
-      this.content.append(this.grid[i][j].image);
+
+      contentFrag.appendChild(this.grid[i][j].image[0]);
     }
   }
 
-  this.flipTime();
+  this.content.html(contentFrag);
+
+  _.bindAll(this, 'finishLoading');
+
+  this.content.hide();
+
+  this.finishedLoading = false;
+  this.finishLoadingTimeout = setTimeout(this.finishLoading, 5000);
+
+  // Listen for load events on images
+  this.content.find('.album img').load(_.after(this.options.rows * this.cols, this.finishLoading));
+};
+
+App.prototype.finishLoading = function() {
+  var that = this;
+
+  clearTimeout(this.finishLoadingTimeout);
+  this.finishLoadingTimeout = null;
+  if (this.finishedLoading) {
+    return;
+  }
+  this.finishedLoading = true;
+
+  // Stop flipping to prevent double-flipping
+  if (this.flipTimeout) {
+    clearTimeout(this.flipTimeout);
+    this.flipTimeout = null;
+  }
+
+  // Stop the animation in case multiple calls to startFlip
+  // triggered finishLoading more than once
+  this.content.stop().hide();
+
+  // Ready to go. Fade in and start flipping.
+  this.content.fadeIn(function() {
+    // Set opacity to 1 again because there's a bug where
+    // fadeIn ends up at a very low opacity. Maybe a race-
+    // condition with the call to hide?
+    that.content.css('opacity', 1.0);
+    that.flipTime();
+  });
 };
 
 App.prototype.getAlbumArt = function(index) {
@@ -141,8 +185,6 @@ App.prototype.getAlbumArt = function(index) {
 };
 
 App.prototype.flipTime = function() {
-  var that = this;
-
   var col = this.randInt(this.cols);
   var row = this.randInt(this.options.rows);
   var dir = this.randInt(2) === 1 ? 'l' : 'r';
